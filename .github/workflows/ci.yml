@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --all-extras --dev
+
+      - name: Test
+        run: uv run pytest -q
+
+      - name: Check manifest versions agree
+        run: uv run python scripts/sync_version.py --check
+
+      - name: Server starts and registers its tools
+        run: uv run python scripts/smoke_test.py
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Build wheel and sdist
+        run: uv build
+
+      - name: Wheel contains the vendored dataset
+        run: |
+          python -c "
+          import zipfile, glob, sys
+          wheel = glob.glob('dist/*.whl')[0]
+          names = zipfile.ZipFile(wheel).namelist()
+          needed = [
+              'mitre_atlas_mcp/data/atlas/ATLAS.yaml',
+              'mitre_atlas_mcp/data/atlas/RELEASE',
+          ]
+          missing = [n for n in needed if n not in names]
+          if missing:
+              sys.exit(f'wheel is missing {missing}')
+          print(f'{wheel}: dataset present, {len(names)} entries')
+          "
+
+      - name: Install the built wheel clean and run it
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install --quiet dist/*.whl
+          /tmp/clean/bin/python -c "
+          from mitre_atlas_mcp.tools.reference import get_atlas_info
+          info = get_atlas_info()
+          assert info['techniques'] == 221, info
+          print('installed wheel serves ATLAS', info['atlas_release'])
+          "
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: npm package manifest is valid and files resolve
+        run: |
+          npm pack --dry-run

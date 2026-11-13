@@ -1,0 +1,76 @@
+[project]
+name = "mitre-atlas-mcp-server"
+dynamic = ["version"]
+description = "MCP server for threat-modeling AI and agentic systems against MITRE ATLAS"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Inoussa Mouiche", email = "mouiche@uwindsor.ca" }
+]
+license = { text = "Apache-2.0" }
+keywords = [
+    "mcp",
+    "mitre",
+    "atlas",
+    "adversarial-ai",
+    "ai-security",
+    "agentic-ai",
+    "threat-modeling",
+    "ai-red-teaming",
+    "model-context-protocol",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Security",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    # Upper-bounded deliberately. mcp 2.0 renamed FastMCP to MCPServer, which
+    # broke every server that had declared an open `mcp>=1.x`. Widen this only
+    # alongside the import in server.py.
+    "mcp>=2.3.0,<3",
+    "pyyaml>=6.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/imouiche/mitre-atlas-mcp-server"
+Repository = "https://github.com/imouiche/mitre-atlas-mcp-server"
+
+[project.scripts]
+mitre-atlas-mcp-server = "mitre_atlas_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Single source of truth for the version. scripts/sync_version.py propagates
+# this into package.json and server.json so the registries cannot drift.
+[tool.hatch.version]
+path = "src/mitre_atlas_mcp/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+# The vendored dataset under data/atlas/ is picked up automatically as package
+# data; an explicit force-include here collides with it at build time.
+packages = ["src/mitre_atlas_mcp"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.24.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

@@ -1,0 +1,39 @@
+{
+  "_comment": [
+    "Drop the mcpServers entry into your Claude Desktop or Claude Code config.",
+    "The uvx form needs nothing installed beyond uv itself and is the one to",
+    "prefer. The other two are shown for environments where uv is unavailable",
+    "or where you are running from a checkout."
+  ],
+  "mcpServers": {
+    "mitre-atlas": {
+      "command": "uvx",
+      "args": ["mitre-atlas-mcp-server"]
+    }
+  },
+  "_alternatives": {
+    "npm": {
+      "mcpServers": {
+        "mitre-atlas": {
+          "command": "npx",
+          "args": ["-y", "@imouiche/mitre-atlas-mcp-server"]
+        }
+      }
+    },
+    "from_a_local_checkout": {
+      "mcpServers": {
+        "mitre-atlas": {
+          "command": "uv",
+          "args": [
+            "--directory",
+            "/absolute/path/to/MITRE-ATLAS-MCP-SERVER",
+            "run",
+            "python",
+            "-m",
+            "mitre_atlas_mcp.server"
+          ]
+        }
+      }
+    }
+  }
+}

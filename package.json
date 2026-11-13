@@ -1,0 +1,47 @@
+{
+  "name": "@imouiche/mitre-atlas-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for threat-modeling AI and agentic systems against MITRE ATLAS",
+  "mcpName": "io.github.imouiche/mitre-atlas-mcp-server",
+  "author": "Dr. Inoussa Mouiche <mouiche@uwindsor.ca> WASP Lab, University of Windsor",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imouiche/mitre-atlas-mcp-server.git"
+  },
+  "homepage": "https://github.com/imouiche/mitre-atlas-mcp-server#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mitre",
+    "mitre-atlas",
+    "atlas",
+    "adversarial-ai",
+    "ai-security",
+    "agentic-ai",
+    "agent-security",
+    "threat-modeling",
+    "ai-red-teaming",
+    "llm-security",
+    "prompt-injection",
+    "machine-learning-security",
+    "cybersecurity",
+    "open-source"
+  ],
+  "bin": {
+    "mitre-atlas-mcp-server": "run.js"
+  },
+  "files": [
+    "run.js",
+    "pyproject.toml",
+    "src/**/*.py",
+    "src/mitre_atlas_mcp/data/atlas/ATLAS.yaml",
+    "src/mitre_atlas_mcp/data/atlas/RELEASE",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

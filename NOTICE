@@ -1,0 +1,23 @@
+MITRE ATLAS MCP Server
+Copyright 2026 Inoussa Mouiche
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+------------------------------------------------------------------------------
+Third-party content
+------------------------------------------------------------------------------
+
+This distribution vendors the MITRE ATLAS dataset at
+src/mitre_atlas_mcp/data/atlas/ATLAS.yaml, taken unmodified from release
+v2026.10 of:
+
+    https://github.com/mitre-atlas/atlas-data
+
+    Copyright 2021-2026 MITRE
+    Licensed under the Apache License, Version 2.0
+
+ATLAS(TM) and ATT&CK(R) are trademarks of The MITRE Corporation. This project
+is not affiliated with, sponsored by, or endorsed by The MITRE Corporation.
+Technique, tactic, mitigation and case-study identifiers and descriptions
+originate with MITRE ATLAS; this project supplies the attack-surface taxonomy
+that maps system architecture onto them.
