@@ -20,15 +20,29 @@ vendored.
 ## Install
 
 ```bash
-# Preferred: isolated, nothing installed globally
-uvx mitre-atlas-mcp-server
-
-# Or from PyPI
-pip install mitre-atlas-mcp-server
-
-# Or from npm
 npx -y @imouiche/mitre-atlas-mcp-server
 ```
+
+Requires Node 18+ and Python 3.12+ on `PATH`. On first run it prepares a
+private virtualenv under `~/.mitre-atlas-mcp-server/runtime`, which takes a few
+seconds: both datasets are already in the package, so only `mcp` and `pyyaml`
+are installed and nothing is downloaded. Nothing touches your system or active
+Python environment.
+
+| Variable | Effect |
+|---|---|
+| `MITRE_ATLAS_PYTHON` | Use this interpreter directly and skip virtualenv creation. It must already satisfy the dependencies in `pyproject.toml`. |
+| `MITRE_ATLAS_RUNTIME_DIR` | Relocate the cached virtualenv. |
+
+The PyPI release is not published yet, so these do not work today:
+
+```bash
+uvx mitre-atlas-mcp-server            # pending PyPI
+pip install mitre-atlas-mcp-server    # pending PyPI
+```
+
+`uvx` will become the recommended path once the package is on PyPI, since it
+needs no Node at all.
 
 ### Claude Desktop / Claude Code
 
@@ -36,8 +50,8 @@ npx -y @imouiche/mitre-atlas-mcp-server
 {
   "mcpServers": {
     "mitre-atlas": {
-      "command": "uvx",
-      "args": ["mitre-atlas-mcp-server"]
+      "command": "npx",
+      "args": ["-y", "@imouiche/mitre-atlas-mcp-server"]
     }
   }
 }
