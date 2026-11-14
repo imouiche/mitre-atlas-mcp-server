@@ -1,71 +1,32 @@
 """MCP server entry point.
 
-Every tool registered here is implemented and tested. Planned tools that are
-not yet built are tracked in docs/roadmap.md,
-so a client never sees a tool that fails when called.
+The MCPServer instance lives in app.py; the tool modules decorate their
+functions with @mcp.tool() and register themselves on import. This module
+imports them for that side effect, then adds the resources and prompts and
+provides main().
+
+Every tool registered is implemented and tested. Planned tools that are not
+yet built are tracked in docs/roadmap.md, so a client never sees a tool that
+fails when called.
 """
 
 from __future__ import annotations
 
 import logging
 
-from mcp.server.mcpserver import MCPServer
-
 from . import __version__
+from .app import mcp
 from .data.loader import get_atlas, pinned_release
 from .profile import SURFACES
+
+# Imported for the registration side effect: each module applies @mcp.tool()
+# to its own functions. Re-exported so `from .server import reference` keeps
+# working and linters do not flag the imports as unused.
 from .tools import crossmap, reference, threatmodel
 
+__all__ = ["mcp", "main", "crossmap", "reference", "threatmodel"]
+
 logger = logging.getLogger(__name__)
-
-# mcp 2.x renamed FastMCP to MCPServer. The dependency is pinned to >=2.3,<3
-# in pyproject.toml rather than left open: the ATT&CK server declared
-# `mcp>=1.1.0`, and when 2.0 landed its `mcp.server.fastmcp` import began
-# failing on every fresh install.
-mcp = MCPServer(
-    name="mitre-atlas",
-    version=__version__,
-    instructions=(
-        "MITRE ATLAS for AI and agentic system security.\n\n"
-        "To threat-model a system: call list_surfaces, decide which surfaces "
-        "the system has, then call profile_ai_system with those keys. It "
-        "returns applicable techniques, mitigations ranked by coverage, and "
-        "the compounding risks specific surface combinations create. Follow up "
-        "with find_analogous_incidents for real precedents and get_case_study "
-        "for a step-by-step attack flow.\n\n"
-        "For direct lookup, use list_tactics, get_technique, search_techniques, "
-        "get_techniques_by_tactic, get_mitigation and search_case_studies.\n\n"
-        "ATLAS tags techniques by platform: Agentic AI, Generative AI, "
-        "Predictive AI, Enterprise. Agentic AI is the default for the "
-        "threat-model tools."
-    ),
-)
-
-# -- reference layer ------------------------------------------------------
-
-mcp.tool()(reference.get_atlas_info)
-mcp.tool()(reference.list_tactics)
-mcp.tool()(reference.get_technique)
-mcp.tool()(reference.search_techniques)
-mcp.tool()(reference.get_techniques_by_tactic)
-mcp.tool()(reference.get_mitigation)
-mcp.tool()(reference.get_mitigations_for_technique)
-mcp.tool()(reference.get_case_study)
-mcp.tool()(reference.search_case_studies)
-mcp.tool()(reference.get_software)
-
-# -- threat-modelling layer -----------------------------------------------
-
-mcp.tool()(threatmodel.list_surfaces)
-mcp.tool()(threatmodel.map_surface_to_techniques)
-mcp.tool()(threatmodel.profile_ai_system)
-mcp.tool()(threatmodel.find_analogous_incidents)
-
-# -- cross-framework ------------------------------------------------------
-
-mcp.tool()(crossmap.map_atlas_to_attack)
-mcp.tool()(crossmap.map_attack_to_atlas)
-mcp.tool()(crossmap.map_technique_to_frameworks)
 
 
 # -- resources ------------------------------------------------------------

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..data.cosai_loader import get_cosai
+from ..app import mcp
 from ..data.loader import MATURITY_ORDER, PLATFORMS, get_atlas, pinned_release
 from ..views import (
     case_study_view,
@@ -22,6 +23,7 @@ def _maturity_rank(value: str | None) -> int:
         return len(MATURITY_ORDER)
 
 
+@mcp.tool()
 def get_atlas_info() -> dict[str, Any]:
     """Which datasets this server serves, and how much of each there is.
 
@@ -37,6 +39,7 @@ def get_atlas_info() -> dict[str, Any]:
     }
 
 
+@mcp.tool()
 def list_tactics() -> dict[str, Any]:
     """All 16 ATLAS tactics, in matrix order, with technique counts."""
     atlas = get_atlas()
@@ -46,6 +49,7 @@ def list_tactics() -> dict[str, Any]:
     }
 
 
+@mcp.tool()
 def get_technique(technique_id: str) -> dict[str, Any]:
     """Full detail for one technique or sub-technique, e.g. ``AML.T0051``."""
     atlas = get_atlas()
@@ -58,6 +62,7 @@ def get_technique(technique_id: str) -> dict[str, Any]:
     return technique_view(atlas, tid)
 
 
+@mcp.tool()
 def search_techniques(
     keyword: str,
     platform: str | None = None,
@@ -102,6 +107,7 @@ def search_techniques(
     }
 
 
+@mcp.tool()
 def get_techniques_by_tactic(tactic: str, platform: str | None = None) -> dict[str, Any]:
     """Techniques that achieve a tactic, by id (``AML.TA0005``) or name ("Execution")."""
     atlas = get_atlas()
@@ -133,6 +139,7 @@ def get_techniques_by_tactic(tactic: str, platform: str | None = None) -> dict[s
     }
 
 
+@mcp.tool()
 def get_mitigation(mitigation_id: str) -> dict[str, Any]:
     """Full detail for one mitigation, e.g. ``AML.M0000``."""
     atlas = get_atlas()
@@ -142,6 +149,7 @@ def get_mitigation(mitigation_id: str) -> dict[str, Any]:
     return mitigation_view(atlas, mid)
 
 
+@mcp.tool()
 def get_mitigations_for_technique(technique_id: str) -> dict[str, Any]:
     """Mitigations ATLAS maps to a technique.
 
@@ -169,6 +177,7 @@ def get_mitigations_for_technique(technique_id: str) -> dict[str, Any]:
     }
 
 
+@mcp.tool()
 def get_case_study(case_study_id: str) -> dict[str, Any]:
     """One case study with its ordered attack flow, e.g. ``AML.CS0000``.
 
@@ -183,6 +192,7 @@ def get_case_study(case_study_id: str) -> dict[str, Any]:
     return case_study_view(atlas, cid)
 
 
+@mcp.tool()
 def search_case_studies(
     keyword: str | None = None,
     case_study_type: str | None = None,
@@ -233,6 +243,7 @@ def search_case_studies(
     }
 
 
+@mcp.tool()
 def get_software(software_id: str) -> dict[str, Any]:
     """An attacker tool catalogued by ATLAS, e.g. ``AML.S0000``."""
     atlas = get_atlas()

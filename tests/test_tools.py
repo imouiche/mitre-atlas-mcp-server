@@ -255,3 +255,39 @@ def test_map_attack_to_atlas_round_trips():
 def test_map_attack_to_atlas_unknown_id_is_empty_not_error():
     out = crossmap.map_attack_to_atlas("T9999")
     assert out["count"] == 0 and "error" not in out
+
+
+# -- registration style ---------------------------------------------------
+
+
+def test_every_tool_is_registered_with_a_decorator():
+    """Tools must use @mcp.tool() directly above their def.
+
+    Directory crawlers and security scanners enumerate tools by reading the
+    source, not by importing it. Functional registration such as
+    `mcp.tool()(reference.get_atlas_info)` works at runtime but is invisible
+    to them: MCPRush listed this server with no tools at all until the
+    decorators were added.
+    """
+    import asyncio
+    import pathlib
+    import re
+
+    from mitre_atlas_mcp.server import mcp
+
+    registered = {t.name for t in asyncio.run(mcp.list_tools())}
+
+    src = pathlib.Path(__file__).parent.parent / "src"
+    discoverable = set()
+    for path in src.rglob("*.py"):
+        for m in re.finditer(
+            r"@mcp\.tool\(\)\s*\n\s*(?:async\s+)?def\s+(\w+)", path.read_text()
+        ):
+            discoverable.add(m.group(1))
+
+    missing = sorted(registered - discoverable)
+    assert not missing, (
+        f"these tools are registered but not statically discoverable: {missing}. "
+        "Use @mcp.tool() above the function rather than calling mcp.tool()(fn)."
+    )
+    assert discoverable == registered

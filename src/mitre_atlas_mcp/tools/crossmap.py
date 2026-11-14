@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..data.cosai_loader import get_cosai, pinned_commit
+from ..app import mcp
 from ..data.loader import get_atlas
 from ..views import technique_view
 
@@ -33,6 +34,7 @@ def _coverage(atlas) -> dict[str, Any]:
     }
 
 
+@mcp.tool()
 def map_atlas_to_attack(technique_id: str) -> dict[str, Any]:
     """The ATT&CK technique an ATLAS technique parallels, if ATLAS asserts one.
 
@@ -68,6 +70,7 @@ def map_atlas_to_attack(technique_id: str) -> dict[str, Any]:
     }
 
 
+@mcp.tool()
 def map_attack_to_atlas(attack_id: str) -> dict[str, Any]:
     """ATLAS techniques that reference a given ATT&CK technique, e.g. ``T1596``.
 
@@ -92,6 +95,7 @@ def map_attack_to_atlas(attack_id: str) -> dict[str, Any]:
     }
 
 
+@mcp.tool()
 def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
     """Every framework an ATLAS technique maps to: ATT&CK, STRIDE, OWASP, NIST.
 

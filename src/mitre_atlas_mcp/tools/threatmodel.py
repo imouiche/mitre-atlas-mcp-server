@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..app import mcp
 from ..data.loader import MATURITY_ORDER, get_atlas
 from ..profile import SURFACES, SURFACES_BY_KEY, compound_risks_for, unknown_surface_keys
 from ..views import case_study_view, mitigation_view, technique_view
@@ -21,6 +22,7 @@ def _maturity_rank(value: str | None) -> int:
         return len(MATURITY_ORDER)
 
 
+@mcp.tool()
 def list_surfaces() -> dict[str, Any]:
     """The architectural surfaces this server can threat-model against.
 
@@ -61,6 +63,7 @@ def _expand(atlas, seeds: tuple[str, ...]) -> list[str]:
     return [t for t in out if not (t in seen or seen.add(t))]
 
 
+@mcp.tool()
 def map_surface_to_techniques(
     surface: str,
     include_sub_techniques: bool = True,
@@ -100,6 +103,7 @@ def map_surface_to_techniques(
     return result
 
 
+@mcp.tool()
 def profile_ai_system(
     surfaces: list[str],
     platform: str = "Agentic AI",
@@ -202,6 +206,7 @@ def profile_ai_system(
     }
 
 
+@mcp.tool()
 def find_analogous_incidents(
     surfaces: list[str] | None = None,
     technique_ids: list[str] | None = None,
