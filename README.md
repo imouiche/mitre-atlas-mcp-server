@@ -1,6 +1,23 @@
+<div align="center">
+
 # MITRE ATLAS MCP Server
 
-**Threat-model AI and agentic systems against [MITRE ATLAS](https://atlas.mitre.org/).**
+**17 MCP tools that threat-model AI and agentic systems against [MITRE ATLAS](https://atlas.mitre.org/)**
+
+[![MCP tools](https://img.shields.io/badge/MCP%20tools-17-0b7285)](#tools)
+[![ATLAS](https://img.shields.io/badge/ATLAS-v2026.10-1864ab)](https://atlas.mitre.org/)
+[![CoSAI Risk Map](https://img.shields.io/badge/CoSAI-Risk%20Map-5f3dc4)](https://github.com/cosai-oasis/secure-ai-tooling)
+[![Data](https://img.shields.io/badge/data-vendored%20%7C%20offline-2f9e44)](#data-governance)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-published-success)](https://registry.modelcontextprotocol.io/?q=mitre-atlas-mcp-server)
+[![npm](https://img.shields.io/npm/v/@imouiche/mitre-atlas-mcp-server.svg)](https://www.npmjs.com/package/@imouiche/mitre-atlas-mcp-server)
+[![npm downloads](https://img.shields.io/npm/dm/@imouiche/mitre-atlas-mcp-server.svg)](https://www.npmjs.com/package/@imouiche/mitre-atlas-mcp-server)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
+[Install](#install) · [The idea](#the-idea) · [Tools](#tools) · [Data governance](#data-governance) · [Who owns the fix](#who-owns-the-fix) · [Example](#example)
+
+</div>
+
+---
 
 Describe your system's architecture - an agent with tool access over a RAG
 corpus, say - and get back the ATLAS techniques that apply, the mitigations
@@ -14,8 +31,10 @@ the point is the mapping from *how you built it* to *what can be done to it*.
 Pinned to **ATLAS v2026.10**: 16 tactics, 221 techniques, 44 mitigations, 77
 case studies. Mitigations are enriched with control ownership from the **CoSAI
 Risk Map**, and techniques cross-map to ATT&CK, STRIDE, OWASP Top 10 for LLM
-and NIST AI RMF. 17 tools. No network access at runtime; both datasets are
-vendored.
+and NIST AI RMF.
+
+**Published in the official [MCP Registry](https://registry.modelcontextprotocol.io/?q=mitre-atlas-mcp-server)
+as `io.github.imouiche/mitre-atlas-mcp-server`.**
 
 ## Install
 
@@ -173,42 +192,37 @@ compounds - injection-to-tool-call, corpus-write-to-tool-call, and persistent
 injection with delayed triggers - then the mitigations in coverage order, then
 the real incidents that have already followed that shape.
 
-## Data
+## Data governance
 
-Two datasets are vendored, so the server makes no network calls at runtime.
+Security tooling is only as trustworthy as the data under it, and most MCP
+servers fetch theirs at call time from whatever the upstream API returns today.
+This one does not. **Both datasets ship inside the package, pinned to an exact
+release, and the server makes no network calls while serving.**
 
-**ATLAS** at `src/mitre_atlas_mcp/data/atlas/ATLAS.yaml` (1.1MB), pinned to the
-release tag in `RELEASE`:
+| Property | How it holds |
+|---|---|
+| **Reproducible** | Two identical calls return identical answers. The data cannot shift under a running assessment. |
+| **Offline** | Runs air-gapped. Nothing is fetched at startup or per call; verified by there being no HTTP client anywhere in `src/`. |
+| **Pinned and attributable** | ATLAS at `v2026.10` recorded in `RELEASE`; CoSAI at commit `622605a` recorded in `COMMIT`. Both Apache-2.0, attributed in [NOTICE](NOTICE). |
+| **Integrity-checked** | 123 tests assert collection sizes, that every technique id in the surface taxonomy resolves, and that every ATLAS id CoSAI cites exists in the pinned release. |
+| **No third-party reach** | No telemetry, no analytics, no credentials, no API keys. Nobody outside this repository can change what the server reports. |
+| **Reviewed updates** | A weekly workflow pulls upstream, runs the suite and opens a pull request only when something changed. Refreshes are merged deliberately, never applied silently. |
+
+That last row matters more than it sounds. Upstream renumbers things: a recent
+CoSAI revision dropped a mapping the enrichment relied on, and a stale ATLAS id
+would quietly shorten a threat model rather than erroring. The tests catch that
+before a refresh lands.
+
+### Updating the pinned data
 
 ```bash
-python scripts/refresh_data.py --release v2026.10
-uv run pytest        # the counts and taxonomy ids are asserted
+python scripts/refresh_data.py --release v2026.10   # ATLAS, 1.1MB
+python scripts/refresh_cosai.py --latest            # CoSAI Risk Map, 348KB
+uv run pytest                                        # both pins are asserted
 ```
 
-**CoSAI Risk Map** at `src/mitre_atlas_mcp/data/cosai/` (348KB), pinned to the
-upstream commit in `COMMIT`:
-
-```bash
-python scripts/refresh_cosai.py --latest
-uv run pytest        # the ATLAS ids CoSAI cites are asserted to resolve
-```
-
-Neither dataset is fetched at runtime, and that is deliberate. Shipping the
-data keeps results reproducible, lets the server run air-gapped, and means no
-third party can change what it reports between two identical calls. For a
-security tool that integrity property is worth more than freshness measured in
-days.
-
-Staying current is automated instead: `.github/workflows/refresh-data.yml`
-runs weekly, pulls upstream, runs the suite against the refreshed data and
-opens a pull request only when something changed. Accepting a refresh stays a
-reviewed decision, because upstream can renumber an id the surface taxonomy
-depends on. `get_atlas_info` reports both pins, so a caller can always see
-which releases are being served.
-
-The tests assert collection sizes and that every technique id in the surface
-taxonomy resolves, so a renumbered or retired technique fails the suite instead
-of silently shortening a threat model.
+`get_atlas_info` reports both pins at runtime, so a caller can always see
+exactly which releases produced an answer.
 
 ## Development
 
