@@ -9,3 +9,6 @@ dist/
 build/
 node_modules/
 uv.lock
+
+# mcp-publisher writes auth tokens here; never commit them
+.mcpregistry_*
