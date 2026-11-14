@@ -186,11 +186,56 @@ rather than returning a silent blank.
 > retrieves from our knowledge base, and can issue refunds through our billing
 > API. It remembers prior conversations per customer.
 
-That is `untrusted_input` + `rag` + `tool_use` + `agent_memory`.
-`profile_ai_system` returns the ranked techniques, and leads with the three
-compounds - injection-to-tool-call, corpus-write-to-tool-call, and persistent
-injection with delayed triggers - then the mitigations in coverage order, then
-the real incidents that have already followed that shape.
+That is four surfaces, so `profile_ai_system(["untrusted_input", "rag",
+"tool_use", "agent_memory"])`. Actual output, abridged:
+
+**27 techniques in scope, across 11 tactics. 18 mitigations. 5 techniques ATLAS
+has no mitigation for.**
+
+It leads with what the *combination* creates, not the individual techniques:
+
+```
+untrusted_input + tool_use
+  Injected content becomes attacker-chosen tool calls, the agentic equivalent
+  of remote code execution. Treat every tool the agent can reach as callable
+  by whoever authors the untrusted content.
+
+rag + tool_use
+  Anyone who can write into the indexed corpus can steer tool calls without
+  ever interacting with the system directly.
+
+untrusted_input + agent_memory
+  A single injection persists across sessions and can carry a delayed trigger,
+  so the payload outlives the request that delivered it.
+```
+
+Then the mitigations, ranked by how much they cover, each naming who implements
+it:
+
+```
+AML.M0020  covers 14  Generative AI Guardrails
+           owners: AI Model Serving, AI Platform Provider,
+                   Agentic Platform and Framework Providers
+AML.M0035  covers 11  AI Red Team
+AML.M0024  covers  7  AI Telemetry Logging and Monitoring
+           owners: AI Model Serving, AI Platform Provider,
+                   Agentic Platform and Framework Providers
+```
+
+Then `find_analogous_incidents` for the same surfaces, ranked by how many
+in-scope techniques each case study actually employed:
+
+```
+AML.CS0063  overlap 10  Prompt-Based Attacks Against Gemini via Calendar Invitations
+AML.CS0026  overlap  9  Financial Transaction Hijacking with M365 Copilot as an Insider
+AML.CS0066  overlap  9  ZombieAgent: Data Exfiltration Attack on ChatGPT
+AML.CS0024  overlap  7  Morris II Worm: RAG-Based Attack
+```
+
+A support agent that can move money, matched against a documented financial
+transaction hijack with nine techniques in common. `get_case_study` returns any
+of these as an ordered attack flow: each step's tactic, the technique used, and
+what the operator actually did.
 
 ## Data governance
 
