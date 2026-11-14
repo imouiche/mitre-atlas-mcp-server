@@ -155,3 +155,21 @@ uv run python -m mitre_atlas_mcp.server    # stdio
 Apache-2.0. The ATLAS dataset is © 2021–2026 MITRE, redistributed under
 Apache-2.0 — see [NOTICE](NOTICE). This project is not affiliated with or
 endorsed by MITRE.
+
+Issues and pull requests are welcome at
+[github.com/imouiche/mitre-atlas-mcp-server](https://github.com/imouiche/mitre-atlas-mcp-server/issues).
+
+## Author
+
+**Inoussa Mouiche, Ph.D.** — University of Windsor, WASP Lab. Research in
+threat intelligence automation, machine learning, agent AI security,
+and LLM-powered security operations.
+
+[GitHub](https://github.com/imouiche) ·
+[LinkedIn](https://www.linkedin.com/in/inoussa-mouiche-ph-d-b5b5138b/) ·
+[Google Scholar](https://scholar.google.com/citations?user=_d4cEVoAAAAJ&hl=en) ·
+mouiche@uwindsor.ca
+
+Also the author of the [MITRE ATT&CK MCP Server](https://github.com/imouiche/complete-mitre-attack-mcp-server),
+which covers conventional adversary TTPs; this server covers the AI-specific
+ones and cross-maps between the two.
