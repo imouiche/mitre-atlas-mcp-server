@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "name": "io.github.imouiche/mitre-atlas-mcp-server",
+  "title": "MITRE ATLAS MCP Server",
+  "description": "Threat-model AI and agentic systems against MITRE ATLAS: surfaces, techniques, controls",
+  "repository": {
+    "url": "https://github.com/imouiche/mitre-atlas-mcp-server",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/imouiche/mitre-atlas-mcp-server#readme",
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@imouiche/mitre-atlas-mcp-server",
+      "version": "0.1.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MITRE_ATLAS_PYTHON",
+          "description": "Path to a Python 3.12+ interpreter to use directly. When set, no virtualenv is created and the interpreter must already satisfy the dependencies in pyproject.toml.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "filepath"
+        },
+        {
+          "name": "MITRE_ATLAS_RUNTIME_DIR",
+          "description": "Directory for the cached virtualenv prepared on first run. Defaults to ~/.mitre-atlas-mcp-server/runtime.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "filepath"
+        }
+      ]
+    }
+  ]
+}
