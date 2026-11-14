@@ -12,7 +12,10 @@ This is not a lookup wrapper around the ATLAS matrix. Lookup is included, but
 the point is the mapping from *how you built it* to *what can be done to it*.
 
 Pinned to **ATLAS v2026.10**: 16 tactics, 221 techniques, 44 mitigations, 77
-case studies. No network access at runtime; the dataset is vendored.
+case studies. Mitigations are enriched with control ownership from the **CoSAI
+Risk Map**, and techniques cross-map to ATT&CK, STRIDE, OWASP Top 10 for LLM
+and NIST AI RMF. 17 tools. No network access at runtime; both datasets are
+vendored.
 
 ## Install
 
@@ -42,7 +45,7 @@ npx -y @imouiche/mitre-atlas-mcp-server
 
 ## The idea
 
-ATLAS is organised by adversary intent — tactics and techniques. Engineers
+ATLAS is organised by adversary intent - tactics and techniques. Engineers
 describe systems by architecture. That mismatch is why ATLAS is harder to apply
 than it should be, and it is the gap this server closes.
 
@@ -95,7 +98,7 @@ not invented here.
 | `get_techniques_by_tactic` | By tactic id or name |
 | `get_mitigation` | One mitigation, with everything it covers |
 | `get_mitigations_for_technique` | Mitigations for a technique, inheriting from the parent when a sub-technique has none |
-| `get_case_study` | One case study with its **ordered attack flow** — each step's tactic, technique, and what the operator actually did |
+| `get_case_study` | One case study with its **ordered attack flow** - each step's tactic, technique, and what the operator actually did |
 | `search_case_studies` | By text, by type (27 `Incident`, 50 `Exercise`), or by technique employed |
 | `get_software` | Attacker tooling ATLAS catalogues |
 
@@ -105,15 +108,43 @@ not invented here.
 |---|---|
 | `map_atlas_to_attack` | The ATT&CK technique an ATLAS technique parallels |
 | `map_attack_to_atlas` | The reverse, for teams already modelling against ATT&CK |
+| `map_technique_to_frameworks` | ATT&CK, **STRIDE**, **OWASP Top 10 for LLM** and **NIST AI RMF** for one technique, plus the CoSAI risks and controls behind them |
 
-ATLAS asserts an ATT&CK parallel for 48 of 221 techniques. Both tools report
-that coverage figure, so an empty result is never mistaken for "no parallel
+ATLAS asserts an ATT&CK parallel for 48 of 221 techniques. Every tool reports
+its coverage figure, so an empty result is never mistaken for "no parallel
 exists".
 
 **Resources:** `atlas://matrix` (the matrix as markdown), `atlas://surfaces`
 (the taxonomy).
 
 **Prompts:** `threat_model_this_agent`, `review_mcp_tool_surface`.
+
+## Who owns the fix
+
+ATLAS tells you what to do about a technique. It does not tell you who does it.
+
+So every mitigation this server returns is enriched from the
+[CoSAI Risk Map](https://github.com/cosai-oasis/secure-ai-tooling) (Coalition
+for Secure AI, an OASIS open project), which maps its engineering controls to
+ATLAS mitigation ids. Where a mapping exists you also get the control, the
+**personas who own it**, and the **components it applies to**:
+
+```
+AML.M0028  Enforce Access Controls for AI Agent Tools
+  CoSAI control : Agent Permissions
+  owners        : Agentic Platform and Framework Providers, Application Developer
+  components    : Reasoning Core, Tools, RAG Content, Memory
+```
+
+That turns a ranked mitigation list into assignable work, which is the point of
+threat-modelling a system you are actually building.
+
+**Coverage, stated plainly.** 13 of ATLAS's 44 mitigations have a CoSAI
+control; all 13 cited ids resolve against the pinned ATLAS release. Per
+surface, between 20% and 50% of returned mitigations carry an owner, and
+`agent_config` currently has none. CoSAI pins ATLAS 5.0.1, which predates the
+2026.10 agentic expansion, so its technique-level coverage of the newer agentic
+techniques is thin - the tools say so rather than returning a silent blank.
 
 ## Example
 
@@ -129,13 +160,22 @@ the real incidents that have already followed that shape.
 
 ## Data
 
-The ATLAS dataset is vendored at
-`src/mitre_atlas_mcp/data/atlas/ATLAS.yaml` (1.1MB), pinned to the release tag
-in `RELEASE`. To move to a newer release:
+Two datasets are vendored, so the server makes no network calls at runtime.
+
+**ATLAS** at `src/mitre_atlas_mcp/data/atlas/ATLAS.yaml` (1.1MB), pinned to the
+release tag in `RELEASE`:
 
 ```bash
 python scripts/refresh_data.py --release v2026.10
 uv run pytest        # the counts and taxonomy ids are asserted
+```
+
+**CoSAI Risk Map** at `src/mitre_atlas_mcp/data/cosai/` (188KB), pinned to the
+upstream commit in `COMMIT`:
+
+```bash
+python scripts/refresh_cosai.py --latest
+uv run pytest        # the ATLAS ids CoSAI cites are asserted to resolve
 ```
 
 The tests assert collection sizes and that every technique id in the surface
@@ -153,7 +193,7 @@ uv run python -m mitre_atlas_mcp.server    # stdio
 ## Licence
 
 Apache-2.0. The ATLAS dataset is © 2021–2026 MITRE, redistributed under
-Apache-2.0 — see [NOTICE](NOTICE). This project is not affiliated with or
+Apache-2.0 - see [NOTICE](NOTICE). This project is not affiliated with or
 endorsed by MITRE.
 
 Issues and pull requests are welcome at

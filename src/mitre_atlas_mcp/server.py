@@ -1,7 +1,7 @@
 """MCP server entry point.
 
 Every tool registered here is implemented and tested. Planned tools that are
-not yet built are tracked in docs/roadmap.md rather than registered as stubs,
+not yet built are tracked in docs/roadmap.md,
 so a client never sees a tool that fails when called.
 """
 
@@ -65,6 +65,7 @@ mcp.tool()(threatmodel.find_analogous_incidents)
 
 mcp.tool()(crossmap.map_atlas_to_attack)
 mcp.tool()(crossmap.map_attack_to_atlas)
+mcp.tool()(crossmap.map_technique_to_frameworks)
 
 
 # -- resources ------------------------------------------------------------

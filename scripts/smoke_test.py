@@ -37,6 +37,7 @@ EXPECTED_TOOLS = {
     # cross-framework
     "map_atlas_to_attack",
     "map_attack_to_atlas",
+    "map_technique_to_frameworks",
 }
 
 

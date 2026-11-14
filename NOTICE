@@ -21,3 +21,20 @@ is not affiliated with, sponsored by, or endorsed by The MITRE Corporation.
 Technique, tactic, mitigation and case-study identifiers and descriptions
 originate with MITRE ATLAS; this project supplies the attack-surface taxonomy
 that maps system architecture onto them.
+
+------------------------------------------------------------------------------
+
+This distribution also vendors part of the CoSAI Risk Map at
+src/mitre_atlas_mcp/data/cosai/, taken unmodified from commit
+490652d7b91161595f04c8812fb3f06ec3274bec of:
+
+    https://github.com/cosai-oasis/secure-ai-tooling
+
+    Copyright OASIS Open / Coalition for Secure AI (CoSAI)
+    Licensed under the Apache License, Version 2.0
+
+The vendored files are risks.yaml, controls.yaml, personas.yaml,
+components.yaml, frameworks.yaml and lifecycle-stage.yaml. They supply the
+control ownership attached to ATLAS mitigations and the STRIDE, OWASP Top 10
+for LLM Applications and NIST AI RMF cross-mappings. CoSAI is an OASIS open
+project; this project is not affiliated with or endorsed by OASIS or CoSAI.

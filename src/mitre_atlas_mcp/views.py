@@ -1,8 +1,8 @@
 """Shaping ATLAS objects into tool responses.
 
 ATLAS prose carries two markup conventions that are noise to a model reading a
-tool result: relative cross-reference links (``[Name](/techniques/AML.T0005)``)
-and citation markers (``[[ref-id]]``). Links are flattened to their text with
+tool result: relative cross-reference links ("[Name](/techniques/AML.T0005)")
+and citation markers ("[[ref-id]]"). Links are flattened to their text with
 the id appended so the reference survives in a form a model can act on;
 citation markers are dropped, since the full reference list is returned
 separately as structured data.
@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from .data.cosai_loader import get_cosai
 from .data.loader import AtlasData
 
 _CITATION = re.compile(r"\[\[[^\]]+\]\]")
@@ -90,15 +91,65 @@ def technique_view(
     return view
 
 
+def cosai_controls_view(mitigation_id: str) -> list[dict[str, Any]]:
+    """CoSAI controls that implement an ATLAS mitigation.
+
+    ATLAS says what to do; a CoSAI control also says who owns it and which
+    components it applies to, which is what turns a threat model into
+    assignable work. Returns an empty list when CoSAI maps nothing to this
+    mitigation, which is the case for 31 of the 44 ATLAS mitigations.
+    """
+    cosai = get_cosai()
+    out = []
+    for cid in cosai.controls_for_mitigation(mitigation_id):
+        c = cosai.controls[cid]
+        out.append(
+            {
+                "id": cid,
+                "title": c.get("title"),
+                "category": c.get("category"),
+                "owners": [
+                    {"id": p, "name": cosai.persona_name(p)} for p in (c.get("personas") or [])
+                ],
+                "components": [
+                    {"id": k, "name": cosai.component_name(k)}
+                    for k in cosai.components_for_control(cid)
+                    if k in cosai.components
+                ],
+                # A cross-cutting control declares `risks: all`. Listing all 28
+                # risks would bury the signal, so say so instead.
+                "applies_to_all_risks": cosai.applies_to_all_risks(cid),
+                "addresses_risks": (
+                    []
+                    if cosai.applies_to_all_risks(cid)
+                    else [
+                        {"id": r, "title": (cosai.risks.get(r) or {}).get("title", r)}
+                        for r in cosai.risks_for_control(cid)
+                    ]
+                ),
+            }
+        )
+    return out
+
+
 def mitigation_view(
     atlas: AtlasData,
     mitigation_id: str,
     *,
     brief: bool = False,
+    include_controls: bool = True,
 ) -> dict[str, Any]:
     m = atlas.mitigations[mitigation_id]
     view: dict[str, Any] = {"id": mitigation_id, "name": m["name"]}
     if brief:
+        if include_controls:
+            # Even in brief form, carry the owners: a ranked mitigation list is
+            # far more actionable when each line names who implements it.
+            owners = sorted(
+                {o["name"] for c in cosai_controls_view(mitigation_id) for o in c["owners"]}
+            )
+            if owners:
+                view["owners"] = owners
         return view
     view |= {
         "description": clean_text(m.get("description")),
@@ -111,6 +162,8 @@ def mitigation_view(
         ],
         "references": references(m),
     }
+    if include_controls:
+        view["cosai_controls"] = cosai_controls_view(mitigation_id)
     return view
 
 

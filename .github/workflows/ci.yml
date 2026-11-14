@@ -81,6 +81,29 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: npm package manifest is valid and files resolve
+      - uses: astral-sh/setup-uv@v5
+
+      # Pack, extract and run from the tarball rather than the source tree.
+      # files[] enumerates the vendored data explicitly, so a new data
+      # directory is easy to add to the repository and forget here — which
+      # produces a package that imports fine and then fails at the first tool
+      # call. Checking the source tree would not catch that.
+      - name: Packed npm tarball serves both datasets
         run: |
-          npm pack --dry-run
+          npm pack --silent >/dev/null
+          mkdir -p /tmp/pkg
+          tar xzf ./*.tgz -C /tmp/pkg --strip-components=1
+          echo "packaged data files:"
+          find /tmp/pkg/src -name '*.yaml' -o -name 'RELEASE' -o -name 'COMMIT' \
+            | sed 's|/tmp/pkg/|  |' | sort
+          uv venv --python 3.12 /tmp/venv
+          uv pip install --python /tmp/venv/bin/python --quiet "mcp>=2.3.0,<3" "pyyaml>=6"
+          PYTHONPATH=/tmp/pkg/src /tmp/venv/bin/python - <<'PY'
+          from mitre_atlas_mcp.tools.reference import get_atlas_info, get_mitigation
+          info = get_atlas_info()
+          assert info["techniques"] == 221, info
+          assert info["cosai_risk_map"]["controls"] == 29, info["cosai_risk_map"]
+          enriched = get_mitigation("AML.M0028")["cosai_controls"]
+          assert enriched and enriched[0]["owners"], enriched
+          print(f"tarball serves ATLAS {info['atlas_release']} and the CoSAI Risk Map")
+          PY

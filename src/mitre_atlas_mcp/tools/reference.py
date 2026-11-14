@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..data.cosai_loader import get_cosai
 from ..data.loader import MATURITY_ORDER, PLATFORMS, get_atlas, pinned_release
 from ..views import (
     case_study_view,
@@ -22,9 +23,18 @@ def _maturity_rank(value: str | None) -> int:
 
 
 def get_atlas_info() -> dict[str, Any]:
-    """Which ATLAS release this server serves, and how much of it there is."""
+    """Which datasets this server serves, and how much of each there is.
+
+    Covers the vendored ATLAS release and the vendored CoSAI Risk Map, which
+    supplies the control owners attached to mitigations and the STRIDE, OWASP
+    and NIST cross-mappings.
+    """
     atlas = get_atlas()
-    return {"pinned_release": pinned_release(), **atlas.stats()}
+    return {
+        "pinned_release": pinned_release(),
+        **atlas.stats(),
+        "cosai_risk_map": get_cosai().stats(),
+    }
 
 
 def list_tactics() -> dict[str, Any]:

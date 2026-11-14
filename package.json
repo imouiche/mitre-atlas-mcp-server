@@ -37,6 +37,8 @@
     "src/**/*.py",
     "src/mitre_atlas_mcp/data/atlas/ATLAS.yaml",
     "src/mitre_atlas_mcp/data/atlas/RELEASE",
+    "src/mitre_atlas_mcp/data/cosai/*.yaml",
+    "src/mitre_atlas_mcp/data/cosai/COMMIT",
     "README.md",
     "LICENSE",
     "NOTICE"
