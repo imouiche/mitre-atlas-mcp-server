@@ -54,7 +54,7 @@ def test_every_technique_declares_its_own_tactics(atlas):
     """In v2026.10 all 221 techniques carry their own `achieves` edge.
 
     Documented as an invariant because `tactics_for_technique` has a
-    parent-inheritance fallback that this release never exercises — see
+    parent-inheritance fallback that this release never exercises. See
     test_tactics_fallback_to_parent for direct coverage of that branch.
     """
     missing = [t for t in atlas.techniques if not atlas.targets(t, "achieves")]

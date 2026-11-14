@@ -9,7 +9,7 @@ ATLAS techniques that apply when that surface is present.
 Seed technique ids are deliberately top-level only. The tools expand each seed
 through the ATLAS relationship graph to pick up sub-techniques, mitigations and
 case studies, so this table stays small and auditable. Every id here is
-asserted to exist in the pinned dataset by ``tests/test_profile.py`` — when
+asserted to exist in the pinned dataset by ``tests/test_profile.py``. When
 ATLAS renumbers something, that test fails rather than the server silently
 returning an empty result.
 """
@@ -38,7 +38,7 @@ SURFACES: tuple[Surface, ...] = (
         label="Untrusted input reaches the model",
         question=(
             "Can any content the model sees originate from outside your trust "
-            "boundary — end users, scraped pages, email, uploaded files, "
+            "boundary: end users, scraped pages, email, uploaded files, "
             "third-party API responses?"
         ),
         techniques=(
@@ -97,7 +97,7 @@ SURFACES: tuple[Surface, ...] = (
         key="agent_memory",
         label="Persistent context or memory",
         question=(
-            "Does the agent carry state across turns or sessions — chat "
+            "Does the agent carry state across turns or sessions: chat "
             "history, scratchpad notes, a memory store, cached summaries?"
         ),
         techniques=(
@@ -115,8 +115,8 @@ SURFACES: tuple[Surface, ...] = (
         key="agent_config",
         label="Readable or writable agent configuration",
         question=(
-            "Does the agent read configuration — system prompts, tool "
-            "manifests, MCP server lists, credentials — from a file or "
+            "Does the agent read configuration (system prompts, tool "
+            "manifests, MCP server lists, credentials) from a file or "
             "service that something else can reach?"
         ),
         techniques=(
@@ -220,7 +220,7 @@ SURFACES_BY_KEY: dict[str, Surface] = {s.key: s for s in SURFACES}
 COMPOUND_RISKS: tuple[tuple[tuple[str, str], str], ...] = (
     (
         ("untrusted_input", "tool_use"),
-        "Injected content becomes attacker-chosen tool calls — the agentic "
+        "Injected content becomes attacker-chosen tool calls, the agentic "
         "equivalent of remote code execution. Treat every tool the agent can "
         "reach as callable by whoever authors the untrusted content.",
     ),

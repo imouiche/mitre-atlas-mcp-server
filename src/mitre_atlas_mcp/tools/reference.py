@@ -174,7 +174,7 @@ def get_case_study(case_study_id: str) -> dict[str, Any]:
 
     The flow comes from ATLAS ``employs`` edges, each carrying a step id, the
     tactic it served, what the operator actually did, and which steps it led
-    to — so the result is a sequence, not an unordered technique list.
+    to, so the result is a sequence, not an unordered technique list.
     """
     atlas = get_atlas()
     cid = case_study_id.strip().upper()

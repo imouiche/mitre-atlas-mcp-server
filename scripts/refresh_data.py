@@ -114,7 +114,7 @@ def main() -> int:
         print(f"  {name:15} {n}")
     print("\nNow run: uv run pytest")
     print("Expect failures in test_loader.py (collection sizes) and test_profile.py")
-    print("(taxonomy technique ids) if this release changed either — update both.")
+    print("(taxonomy technique ids) if this release changed either; update both.")
     return 0
 
 

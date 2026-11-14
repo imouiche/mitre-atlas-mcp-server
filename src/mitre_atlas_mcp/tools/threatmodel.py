@@ -109,7 +109,7 @@ def profile_ai_system(
 
     Pass the surface keys that describe the architecture (see
     "list_surfaces"). Returns the applicable ATLAS techniques ordered by
-    maturity — observed in the wild before theoretical — each tagged with the
+    maturity (observed in the wild before theoretical), each tagged with the
     surface that put it in scope; the mitigations that cover them, ranked by
     how many in-scope techniques each one covers; and the compounding risks
     that arise from surface *combinations*, which is where most real agentic
@@ -131,7 +131,7 @@ def profile_ai_system(
 
     cutoff = _maturity_rank(min_maturity) if min_maturity else len(MATURITY_ORDER)
 
-    # Which surfaces expose each technique. the count is the ranking signal.
+    # Which surfaces expose each technique; the count is the ranking signal.
     exposure: dict[str, list[str]] = {}
     for key in keys:
         for tid in _expand(atlas, SURFACES_BY_KEY[key].techniques):

@@ -85,11 +85,11 @@ def atlas_matrix() -> str:
     ]
     for tid, tactic in atlas.tactics.items():
         technique_ids = sorted(atlas.techniques_for_tactic(tid))
-        lines.append(f"## {tactic['name']} ({tid}) — {len(technique_ids)} techniques")
+        lines.append(f"## {tactic['name']} ({tid}) - {len(technique_ids)} techniques")
         for t in technique_ids:
             tech = atlas.techniques[t]
             platforms = ", ".join(tech.get("platforms") or [])
-            lines.append(f"- **{t}** {tech['name']} — {tech.get('maturity')} [{platforms}]")
+            lines.append(f"- **{t}** {tech['name']} - {tech.get('maturity')} [{platforms}]")
         lines.append("")
     return "\n".join(lines)
 
@@ -127,7 +127,7 @@ def threat_model_this_agent(system_description: str) -> str:
         "1. Call list_surfaces and decide which surfaces this system has. "
         "State your reasoning for each one you include and each you rule out.\n"
         "2. Call profile_ai_system with those surface keys.\n"
-        "3. Lead with the compound_risks — those matter more than any single "
+        "3. Lead with the compound_risks, which matter more than any single "
         "technique.\n"
         "4. Call find_analogous_incidents with type=\"Incident\" and cite the "
         "real-world precedents by id.\n"

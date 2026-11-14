@@ -11,23 +11,23 @@ table.
 
 ## Not yet built
 
-**`assess_coverage(surfaces, controls_in_place)`** — take a list of controls
+**`assess_coverage(surfaces, controls_in_place)`** - take a list of controls
 the team already has and return the in-scope techniques those controls do
 *not* address. Needs a vocabulary for "control" that maps onto ATLAS
 mitigation ids without forcing the caller to know them; the obvious approach
 is fuzzy-matching free text against mitigation names and categories, which
 needs care to avoid confidently wrong matches.
 
-**`get_mitigation_plan(surfaces)`** — sequence the mitigations by ATLAS
+**`get_mitigation_plan(surfaces)`** - sequence the mitigations by ATLAS
 `lifecycle-phases` (design / development / deployment / operation) so the
 output is an ordered plan rather than a set. The data supports it;
 `profile_ai_system` currently returns mitigations ranked by coverage only.
 
-**`generate_navigator_layer(surfaces)`** — emit an ATLAS Navigator layer JSON
+**`generate_navigator_layer(surfaces)`** - emit an ATLAS Navigator layer JSON
 scoring in-scope techniques, for visual review. The release ships
 `navigator-*.json` assets whose schema this should match.
 
-**`get_entity(entity_id)`** — the 44 ATLAS entities (AI red teams, research
+**`get_entity(entity_id)`** - the 44 ATLAS entities (AI red teams, research
 orgs) are loaded and indexed, and `get_case_study` resolves `attributed_to`
 through them, but there is no direct lookup tool yet.
 
@@ -56,6 +56,6 @@ Worth reviewing for a future release:
   `get_mitigations_for_technique` falls back to the parent and flags it via
   `inherited_from`. For 8 of those the parent has none either.
 - `tactics_for_technique` has a parent-inheritance fallback that v2026.10
-  never exercises — every technique carries its own `achieves` edge. The
+  never exercises - every technique carries its own `achieves` edge. The
   branch is covered by a synthetic fixture in `test_loader.py` rather than
   real data.

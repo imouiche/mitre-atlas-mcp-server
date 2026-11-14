@@ -85,7 +85,7 @@ jobs:
 
       # Pack, extract and run from the tarball rather than the source tree.
       # files[] enumerates the vendored data explicitly, so a new data
-      # directory is easy to add to the repository and forget here — which
+      # directory is easy to add to the repository and forget here, which
       # produces a package that imports fine and then fails at the first tool
       # call. Checking the source tree would not catch that.
       - name: Packed npm tarball serves both datasets
