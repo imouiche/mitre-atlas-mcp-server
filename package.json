@@ -1,6 +1,6 @@
 {
   "name": "@imouiche/mitre-atlas-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for threat-modeling AI and agentic systems against MITRE ATLAS",
   "mcpName": "io.github.imouiche/mitre-atlas-mcp-server",
   "author": "Dr. Inoussa Mouiche <mouiche@uwindsor.ca> WASP Lab, University of Windsor",

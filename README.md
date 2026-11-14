@@ -7,6 +7,7 @@
 [![MCP tools](https://img.shields.io/badge/MCP%20tools-17-0b7285)](#tools)
 [![ATLAS](https://img.shields.io/badge/ATLAS-v2026.10-1864ab)](https://atlas.mitre.org/)
 [![CoSAI Risk Map](https://img.shields.io/badge/CoSAI-Risk%20Map-5f3dc4)](https://github.com/cosai-oasis/secure-ai-tooling)
+[![Cross-maps](https://img.shields.io/badge/cross--maps-ATT%26CK%20%7C%20OWASP%20%7C%20STRIDE%20%7C%20NIST-e8590c)](#cross-framework)
 [![Data](https://img.shields.io/badge/data-vendored%20%7C%20offline-2f9e44)](#data-governance)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-published-success)](https://registry.modelcontextprotocol.io/?q=mitre-atlas-mcp-server)
 [![npm](https://img.shields.io/npm/v/@imouiche/mitre-atlas-mcp-server.svg)](https://www.npmjs.com/package/@imouiche/mitre-atlas-mcp-server)
@@ -111,7 +112,7 @@ not invented here.
 
 ## Tools
 
-**Threat modelling**
+### Threat modelling
 
 | Tool | Does |
 |---|---|
@@ -120,7 +121,7 @@ not invented here.
 | `map_surface_to_techniques` | One surface at a time, for drilling in |
 | `find_analogous_incidents` | Case studies ranked by technique overlap, each naming the overlapping techniques so the relevance is checkable |
 
-**Reference**
+### Reference
 
 | Tool | Does |
 |---|---|
@@ -135,7 +136,7 @@ not invented here.
 | `search_case_studies` | By text, by type (27 `Incident`, 50 `Exercise`), or by technique employed |
 | `get_software` | Attacker tooling ATLAS catalogues |
 
-**Cross-framework**
+### Cross-framework
 
 | Tool | Does |
 |---|---|
