@@ -2,8 +2,8 @@
 
 **Threat-model AI and agentic systems against [MITRE ATLAS](https://atlas.mitre.org/).**
 
-Describe your system's architecture — an agent with tool access over a RAG
-corpus, say — and get back the ATLAS techniques that apply, the mitigations
+Describe your system's architecture - an agent with tool access over a RAG
+corpus, say - and get back the ATLAS techniques that apply, the mitigations
 that cover them, the compounding risks your specific combination of surfaces
 creates, and the real-world incidents that have already happened to systems
 shaped like yours.
@@ -70,7 +70,7 @@ attacker-chosen actions. `profile_ai_system` reports those compounds
 explicitly rather than leaving you to infer them from two separate lists.
 
 ATLAS v2026.10 tags 148 of its 221 techniques as applying to **Agentic AI**,
-which is what makes this framing tractable — the agentic coverage is MITRE's,
+which is what makes this framing tractable - the agentic coverage is MITRE's,
 not invented here.
 
 ## Tools
@@ -123,8 +123,8 @@ exists".
 
 That is `untrusted_input` + `rag` + `tool_use` + `agent_memory`.
 `profile_ai_system` returns the ranked techniques, and leads with the three
-compounds — injection-to-tool-call, corpus-write-to-tool-call, and persistent
-injection with delayed triggers — then the mitigations in coverage order, then
+compounds - injection-to-tool-call, corpus-write-to-tool-call, and persistent
+injection with delayed triggers - then the mitigations in coverage order, then
 the real incidents that have already followed that shape.
 
 ## Data
@@ -161,7 +161,7 @@ Issues and pull requests are welcome at
 
 ## Author
 
-**Inoussa Mouiche, Ph.D.** — University of Windsor, WASP Lab. Research in
+**Inoussa Mouiche, Ph.D.** - University of Windsor, WASP Lab. Research in
 threat intelligence automation, machine learning, agent AI security,
 and LLM-powered security operations.
 
