@@ -144,14 +144,8 @@ threat-modelling a system you are actually building.
 **Coverage, stated plainly.** 13 of ATLAS's 44 mitigations have a CoSAI
 control, and all 13 cited ids resolve against the pinned ATLAS release. Per
 surface, roughly a quarter to a half of returned mitigations carry an owner;
-`agent_config` currently has none.
-
-CoSAI writes its references with the ATLAS version they were authored against,
-as in `AML.M0007@5.0.1`. Every current mapping targets 5.0.1, older than the
-release served here, so technique-level coverage of the newer agentic
-techniques is thin. `get_atlas_info` reports this as
-`mappings_by_atlas_version`, and the cross-framework tool says so in its
-coverage block rather than returning a silent blank.
+`agent_config` currently has none. Where CoSAI maps nothing, the tools say so
+rather than returning a silent blank.
 
 ## Example
 
