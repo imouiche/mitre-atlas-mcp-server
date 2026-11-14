@@ -24,8 +24,8 @@ def _maturity_rank(value: str | None) -> int:
 def list_surfaces() -> dict[str, Any]:
     """The architectural surfaces this server can threat-model against.
 
-    Call this first. Each entry has a ``key`` to pass to the other
-    threat-model tools and a ``question`` that decides whether the system
+    Call this first. Each entry has a "key" to pass to the other
+    threat-model tools and "question" that decides whether the system
     under review has that surface.
     """
     return {
@@ -68,7 +68,7 @@ def map_surface_to_techniques(
 ) -> dict[str, Any]:
     """ATLAS techniques that apply to one architectural surface.
 
-    Use ``list_surfaces`` for valid keys. Results are ordered by ATLAS
+    Use "list_surfaces" for valid keys. Results are ordered by ATLAS
     maturity, so techniques observed in the wild come before theoretical ones.
     """
     atlas = get_atlas()
@@ -108,14 +108,14 @@ def profile_ai_system(
     """Threat-model a system from the surfaces it has.
 
     Pass the surface keys that describe the architecture (see
-    ``list_surfaces``). Returns the applicable ATLAS techniques ordered by
+    "list_surfaces"). Returns the applicable ATLAS techniques ordered by
     maturity — observed in the wild before theoretical — each tagged with the
     surface that put it in scope; the mitigations that cover them, ranked by
     how many in-scope techniques each one covers; and the compounding risks
     that arise from surface *combinations*, which is where most real agentic
     exposure lives.
 
-    ``min_maturity`` of "Demonstrated" (the default) drops purely theoretical
+    "min_maturity" of "Demonstrated" (the default) drops purely theoretical
     techniques; pass "Feasible" to include everything, or None for no filter.
     """
     atlas = get_atlas()
@@ -131,7 +131,7 @@ def profile_ai_system(
 
     cutoff = _maturity_rank(min_maturity) if min_maturity else len(MATURITY_ORDER)
 
-    # Which surfaces expose each technique — the count is the ranking signal.
+    # Which surfaces expose each technique. the count is the ranking signal.
     exposure: dict[str, list[str]] = {}
     for key in keys:
         for tid in _expand(atlas, SURFACES_BY_KEY[key].techniques):
