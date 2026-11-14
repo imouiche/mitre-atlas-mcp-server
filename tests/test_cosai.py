@@ -32,10 +32,10 @@ def test_pinned_commit_recorded():
 
 def test_collection_sizes(cosai):
     stats = cosai.stats()
-    assert stats["risks"] == 28
-    assert stats["controls"] == 29
+    assert stats["risks"] == 36
+    assert stats["controls"] == 37
     assert stats["personas"] == 10
-    assert stats["components"] == 23
+    assert stats["components"] == 42
 
 
 # -- dataset alignment ----------------------------------------------------
@@ -106,31 +106,21 @@ def test_cross_cutting_controls_reach_every_risk(cosai):
             assert cid in cosai.controls_by_risk[rid]
 
 
-def test_dangling_component_refs_do_not_grow(cosai):
-    """Upstream leaves a few component ids behind after a rename.
+def test_no_dangling_component_refs(cosai):
+    """Every component a control names must exist.
 
-    componentInputHandling and componentOutputHandling were split into
-    per-layer ids (componentAgentInputHandling and so on) but three controls
-    still reference the old names. Pinned so a CoSAI refresh that worsens this
-    is visible, and so a refresh that fixes it prompts removing this test.
+    An earlier CoSAI revision referenced componentInputHandling and
+    componentOutputHandling after they had been split into per-layer ids;
+    upstream has since fixed that. Asserted so a refresh that reintroduces
+    dangling references is caught.
     """
-    dangling = cosai.dangling_component_refs()
-    assert set(dangling) == {
-        "controlRuntimePrivacyEnhancingTechnologies",
-        "controlInputValidationAndSanitization",
-        "controlOutputValidationAndSanitization",
-    }
-    assert all(
-        m in {"componentInputHandling", "componentOutputHandling"}
-        for v in dangling.values()
-        for m in v
-    )
+    assert cosai.dangling_component_refs() == {}
 
 
 def test_reverse_indexes_agree_with_source(cosai):
     for mid, control_ids in cosai.controls_by_mitigation.items():
         for cid in control_ids:
-            assert mid in (cosai.controls[cid].get("mappings") or {})["mitre-atlas"]
+            assert mid in cosai._atlas_refs(cosai.controls[cid])
     for rid, control_ids in cosai.controls_by_risk.items():
         for cid in control_ids:
             assert rid in cosai.risks_for_control(cid)
@@ -140,14 +130,14 @@ def test_reverse_indexes_agree_with_source(cosai):
 
 
 def test_enrichment_attaches_owners_and_components():
-    # AML.M0028 Enforce Access Controls for AI Agent Tools -> Agent Permissions
-    controls = cosai_controls_view("AML.M0028")
-    assert controls, "expected a CoSAI control for AML.M0028"
+    # AML.M0004 Limit AI Service Query Volume and Rate -> Agent Execution Bounds
+    controls = cosai_controls_view("AML.M0004")
+    assert controls, "expected a CoSAI control for AML.M0004"
     c = controls[0]
-    assert c["title"] == "Agent Permissions"
+    assert c["title"] == "Agent Execution Bounds"
     assert any(o["name"] == "Application Developer" for o in c["owners"])
     assert c["components"], "control should name the components it applies to"
-    assert c["addresses_risks"]
+    assert c["addresses_risks"] or c["applies_to_all_risks"]
 
 
 def test_enrichment_is_empty_not_broken_for_unmapped_mitigation(atlas):
@@ -162,16 +152,16 @@ def test_enrichment_is_empty_not_broken_for_unmapped_mitigation(atlas):
 def test_mitigation_view_carries_controls_and_can_opt_out(atlas):
     from mitre_atlas_mcp.views import mitigation_view
 
-    with_controls = mitigation_view(atlas, "AML.M0028")
+    with_controls = mitigation_view(atlas, "AML.M0004")
     assert with_controls["cosai_controls"]
-    without = mitigation_view(atlas, "AML.M0028", include_controls=False)
+    without = mitigation_view(atlas, "AML.M0004", include_controls=False)
     assert "cosai_controls" not in without
 
 
 def test_brief_mitigation_view_names_owners(atlas):
     from mitre_atlas_mcp.views import mitigation_view
 
-    brief = mitigation_view(atlas, "AML.M0028", brief=True)
+    brief = mitigation_view(atlas, "AML.M0004", brief=True)
     assert brief["owners"], "a ranked mitigation line should name who implements it"
 
 
@@ -193,7 +183,7 @@ def test_profile_mitigations_name_owners():
 def test_atlas_info_reports_cosai_provenance():
     info = reference.get_atlas_info()
     assert "cosai_risk_map" in info
-    assert info["cosai_risk_map"]["controls"] == 29
+    assert info["cosai_risk_map"]["controls"] == 37
     assert len(info["cosai_risk_map"]["cosai_commit"]) == 12
 
 
@@ -206,7 +196,8 @@ def test_map_technique_to_frameworks_prompt_injection():
     assert "OWASP Top 10 for LLM" in names
     assert "STRIDE" in names
     owasp = next(f for f in out["other_frameworks"] if f["framework"] == "OWASP Top 10 for LLM")
-    assert "LLM01" in owasp["ids"]
+    # Upstream qualifies the ids with the list year, e.g. LLM01:2025.
+    assert any(i.startswith("LLM01") for i in owasp["ids"]), owasp["ids"]
     assert owasp["version"] and owasp["url"]
     assert out["cosai_risks"]
     assert any(r["controls"] for r in out["cosai_risks"])
@@ -233,3 +224,28 @@ def test_map_technique_to_frameworks_unknown_id():
 def test_declared_frameworks_exist_in_metadata(cosai):
     for fw in OTHER_FRAMEWORKS:
         assert fw in cosai.frameworks, f"{fw} is not declared in frameworks.yaml"
+
+
+# -- version-suffixed references -----------------------------------------
+
+
+def test_mapping_references_carry_an_atlas_version(cosai):
+    """Upstream writes references as AML.M0007@5.0.1.
+
+    The suffix is stripped for lookups and kept for reporting, so the loader
+    must handle both forms. A refresh that drops the suffix should still work.
+    """
+    assert cosai._split_ref("AML.M0007@5.0.1") == ("AML.M0007", "5.0.1")
+    assert cosai._split_ref("AML.M0007") == ("AML.M0007", None)
+
+
+def test_mapping_versions_are_reported(cosai):
+    versions = cosai.mapping_versions()
+    assert versions, "expected mappings to declare the ATLAS version they target"
+    # Every current mapping targets 5.0.1, older than the release we serve.
+    assert "5.0.1" in versions
+    assert sum(versions.values()) == 53
+
+
+def test_stats_surface_the_mapping_staleness(cosai):
+    assert cosai.stats()["mappings_by_atlas_version"] == {"5.0.1": 53}

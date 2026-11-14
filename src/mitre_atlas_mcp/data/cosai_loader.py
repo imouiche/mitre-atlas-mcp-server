@@ -75,8 +75,42 @@ class CosaiData:
                 self.controls_by_risk[rid].append(cid)
 
     @staticmethod
-    def _atlas_refs(obj: dict) -> list[str]:
-        return list((obj.get("mappings") or {}).get("mitre-atlas") or ())
+    def _split_ref(ref: str) -> tuple[str, str | None]:
+        """Split a mapping reference into its id and the ATLAS version it was authored against.
+
+        Upstream writes references as ``AML.M0007@5.0.1``. The suffix records
+        which ATLAS release the mapping was validated against, which is worth
+        keeping rather than discarding: it is how a caller can tell a mapping
+        checked against the release we serve from one carried over from an
+        older one.
+        """
+        head, _, version = ref.partition("@")
+        return head.strip(), (version.strip() or None)
+
+    @classmethod
+    def _atlas_refs(cls, obj: dict) -> list[str]:
+        """ATLAS ids a CoSAI object maps to, with any version suffix removed."""
+        raw = (obj.get("mappings") or {}).get("mitre-atlas") or ()
+        return [cls._split_ref(r)[0] for r in raw]
+
+    @classmethod
+    def _atlas_refs_versioned(cls, obj: dict) -> list[tuple[str, str | None]]:
+        raw = (obj.get("mappings") or {}).get("mitre-atlas") or ()
+        return [cls._split_ref(r) for r in raw]
+
+    def mapping_versions(self) -> dict[str, int]:
+        """How many mappings were authored against each ATLAS version.
+
+        Surfaced by get_atlas_info so the staleness of the bridge is visible:
+        upstream currently pins every mapping to ATLAS 5.0.1 even though it
+        vendors a newer release.
+        """
+        counts: dict[str, int] = {}
+        for obj in (*self.controls.values(), *self.risks.values()):
+            for _, version in self._atlas_refs_versioned(obj):
+                key = version or "unversioned"
+                counts[key] = counts.get(key, 0) + 1
+        return dict(sorted(counts.items()))
 
     @staticmethod
     def _expand_sentinel(value: Any, universe: list[str]) -> list[str]:
@@ -171,6 +205,7 @@ class CosaiData:
             "components": len(self.components),
             "atlas_mitigations_with_controls": len(self.controls_by_mitigation),
             "atlas_techniques_with_risks": len(self.risks_by_technique),
+            "mappings_by_atlas_version": self.mapping_versions(),
         }
 
 

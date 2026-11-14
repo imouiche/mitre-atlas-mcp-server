@@ -1,0 +1,98 @@
+name: Check upstream data
+
+# Keeps the vendored MITRE ATLAS and CoSAI Risk Map data current without
+# fetching anything at runtime.
+#
+# The server deliberately ships its data and makes no network calls when
+# serving: that keeps results reproducible, lets it run in an air-gapped
+# environment, and means no third party can change what the server reports
+# between two identical calls. Fetching upstream at runtime would trade all of
+# that away, and for a security tool the integrity property matters more than
+# freshness measured in days.
+#
+# So the refresh is automated here instead. This runs weekly, pulls upstream,
+# runs the full suite, and opens a pull request only when something actually
+# changed. Whether to accept a refresh stays a reviewed decision, which is
+# what you want when upstream can renumber an id the taxonomy depends on.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --all-extras --dev
+
+      - name: Refresh the CoSAI Risk Map
+        id: cosai
+        run: |
+          before=$(cat src/mitre_atlas_mcp/data/cosai/COMMIT)
+          uv run python scripts/refresh_cosai.py --latest
+          after=$(cat src/mitre_atlas_mcp/data/cosai/COMMIT)
+          echo "before=$before" >> "$GITHUB_OUTPUT"
+          echo "after=$after" >> "$GITHUB_OUTPUT"
+
+      - name: Check for a newer ATLAS release
+        run: |
+          # Reports only; bumping ATLAS changes asserted counts and the surface
+          # taxonomy, so it is done deliberately rather than on a schedule.
+          uv run python scripts/refresh_data.py --list | head -5
+
+      - name: Run the suite against the refreshed data
+        id: tests
+        continue-on-error: true
+        run: |
+          uv run pytest -q 2>&1 | tail -30
+          uv run python scripts/smoke_test.py
+
+      - name: Summarise
+        run: |
+          {
+            echo "### Vendored data check"
+            echo
+            echo "CoSAI: \`${{ steps.cosai.outputs.before }}\` -> \`${{ steps.cosai.outputs.after }}\`"
+            echo
+            if [ "${{ steps.tests.outcome }}" = "success" ]; then
+              echo "Suite passed against the refreshed data."
+            else
+              echo "**Suite failed against the refreshed data.** Upstream likely"
+              echo "changed collection sizes, renumbered an id the surface taxonomy"
+              echo "depends on, or altered the mapping reference format."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open a pull request if the data moved
+        if: steps.cosai.outputs.before != steps.cosai.outputs.after
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/refresh-cosai
+          title: "Update vendored CoSAI Risk Map"
+          commit-message: "Update vendored CoSAI Risk Map"
+          body: |
+            Automated refresh of the vendored CoSAI Risk Map.
+
+            `${{ steps.cosai.outputs.before }}` -> `${{ steps.cosai.outputs.after }}`
+
+            Test suite against the refreshed data: **${{ steps.tests.outcome }}**.
+
+            Review before merging. `tests/test_cosai.py` pins the collection
+            sizes, asserts every ATLAS id CoSAI cites resolves against the
+            vendored ATLAS release, and checks the mapping reference format.
+            A failure here usually means upstream grew, renumbered an id, or
+            changed how references are written, and the assertions need
+            updating alongside the data.
+          labels: data
+          delete-branch: true

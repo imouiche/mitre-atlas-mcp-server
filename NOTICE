@@ -26,7 +26,7 @@ that maps system architecture onto them.
 
 This distribution also vendors part of the CoSAI Risk Map at
 src/mitre_atlas_mcp/data/cosai/, taken unmodified from commit
-490652d7b91161595f04c8812fb3f06ec3274bec of:
+622605a13fafaa2784acbdbe3f8d23ee22da4be7 of:
 
     https://github.com/cosai-oasis/secure-ai-tooling
 

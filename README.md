@@ -130,21 +130,28 @@ ATLAS mitigation ids. Where a mapping exists you also get the control, the
 **personas who own it**, and the **components it applies to**:
 
 ```
-AML.M0028  Enforce Access Controls for AI Agent Tools
-  CoSAI control : Agent Permissions
-  owners        : Agentic Platform and Framework Providers, Application Developer
-  components    : Reasoning Core, Tools, RAG Content, Memory
+AML.M0004  Limit AI Service Query Volume and Rate
+  CoSAI control : Agent Execution Bounds
+  owners        : Agentic Platform and Framework Providers, Application Developer,
+                  AI Platform Provider
+  components    : Agent Reasoning Core, Orchestration Input Handling,
+                  Orchestration Output Handling
 ```
 
 That turns a ranked mitigation list into assignable work, which is the point of
 threat-modelling a system you are actually building.
 
 **Coverage, stated plainly.** 13 of ATLAS's 44 mitigations have a CoSAI
-control; all 13 cited ids resolve against the pinned ATLAS release. Per
-surface, between 20% and 50% of returned mitigations carry an owner, and
-`agent_config` currently has none. CoSAI pins ATLAS 5.0.1, which predates the
-2026.10 agentic expansion, so its technique-level coverage of the newer agentic
-techniques is thin - the tools say so rather than returning a silent blank.
+control, and all 13 cited ids resolve against the pinned ATLAS release. Per
+surface, roughly a quarter to a half of returned mitigations carry an owner;
+`agent_config` currently has none.
+
+CoSAI writes its references with the ATLAS version they were authored against,
+as in `AML.M0007@5.0.1`. Every current mapping targets 5.0.1, older than the
+release served here, so technique-level coverage of the newer agentic
+techniques is thin. `get_atlas_info` reports this as
+`mappings_by_atlas_version`, and the cross-framework tool says so in its
+coverage block rather than returning a silent blank.
 
 ## Example
 
@@ -170,13 +177,26 @@ python scripts/refresh_data.py --release v2026.10
 uv run pytest        # the counts and taxonomy ids are asserted
 ```
 
-**CoSAI Risk Map** at `src/mitre_atlas_mcp/data/cosai/` (188KB), pinned to the
+**CoSAI Risk Map** at `src/mitre_atlas_mcp/data/cosai/` (348KB), pinned to the
 upstream commit in `COMMIT`:
 
 ```bash
 python scripts/refresh_cosai.py --latest
 uv run pytest        # the ATLAS ids CoSAI cites are asserted to resolve
 ```
+
+Neither dataset is fetched at runtime, and that is deliberate. Shipping the
+data keeps results reproducible, lets the server run air-gapped, and means no
+third party can change what it reports between two identical calls. For a
+security tool that integrity property is worth more than freshness measured in
+days.
+
+Staying current is automated instead: `.github/workflows/refresh-data.yml`
+runs weekly, pulls upstream, runs the suite against the refreshed data and
+opens a pull request only when something changed. Accepting a refresh stays a
+reviewed decision, because upstream can renumber an id the surface taxonomy
+depends on. `get_atlas_info` reports both pins, so a caller can always see
+which releases are being served.
 
 The tests assert collection sizes and that every technique id in the surface
 taxonomy resolves, so a renumbered or retired technique fails the suite instead
