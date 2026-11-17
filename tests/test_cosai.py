@@ -257,3 +257,63 @@ def test_stats_report_what_is_loaded_not_join_coverage(cosai):
     """
     stats = cosai.stats()
     assert set(stats) == {"cosai_commit", "risks", "controls", "personas", "components"}
+
+
+# -- framework attribution ------------------------------------------------
+
+
+def test_framework_ids_are_attributed_per_risk(cosai):
+    """Each risk reports its own ids, so attribution is not left to inference.
+
+    The merged list alone made a reader guess which risk contributed LLM03
+    versus LLM06. These four risks cite genuinely different ids.
+    """
+    expected = {
+        "riskPromptInjection": ["LLM01:2025"],
+        "riskRogueActions": ["LLM06:2025"],
+        "riskInsecureIntegratedComponent": ["LLM03:2025", "LLM06:2025"],
+        "riskModelDeploymentTampering": ["LLM01:2025", "LLM03:2025"],
+    }
+    for rid, owasp in expected.items():
+        assert cosai.frameworks_for_risk(rid)["owasp-top10-llm"] == owasp, rid
+
+
+def test_nist_is_reachable_only_through_controls(cosai):
+    """NIST AI RMF appears on controls, never on risks.
+
+    Walking only the risk hop made the NIST mapping unreachable, so the tool
+    could never return it despite the framework being advertised.
+    """
+    on_risks = [r for r in cosai.risks if "nist-ai-rmf" in cosai.frameworks_for_risk(r)]
+    on_controls = [c for c in cosai.controls if "nist-ai-rmf" in cosai.frameworks_for_control(c)]
+    assert on_risks == [], "unexpected: a risk now carries NIST directly"
+    assert len(on_controls) == 8
+
+
+def test_version_suffix_stripped_from_framework_ids(cosai):
+    """Ids are written as MEASURE-2.3@1.0; the version belongs to the framework."""
+    nist = cosai.frameworks_for_control("controlAgentPluginPermissions")["nist-ai-rmf"]
+    assert nist == ["MEASURE-2.7"]
+    assert all("@" not in i for i in nist)
+
+
+def test_map_technique_to_frameworks_returns_nist_and_attribution():
+    out = crossmap.map_technique_to_frameworks("AML.T0051")
+
+    names = {f["framework"] for f in out["other_frameworks"]}
+    assert "NIST AI RMF" in names, "NIST must be reachable via controls"
+
+    # Attribution is present on every risk, and on the controls carrying NIST.
+    assert all("frameworks" in r for r in out["cosai_risks"])
+    by_title = {r["title"]: r["frameworks"] for r in out["cosai_risks"]}
+    assert by_title["Prompt Injection"]["owasp-top10-llm"] == ["LLM01:2025"]
+    assert by_title["Rogue Actions"]["owasp-top10-llm"] == ["LLM06:2025"]
+
+    nist_controls = [
+        c
+        for r in out["cosai_risks"]
+        for c in r["controls"]
+        if "nist-ai-rmf" in c["frameworks"]
+    ]
+    assert nist_controls, "expected at least one control to carry NIST ids"
+    assert all(c["owners"] for c in nist_controls)

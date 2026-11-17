@@ -175,12 +175,45 @@ class CosaiData:
     def controls_for_mitigation(self, mitigation_id: str) -> list[str]:
         return list(self.controls_by_mitigation.get(mitigation_id, ()))
 
+    def _other_framework_mappings(self, obj: dict) -> dict[str, list[str]]:
+        """Non-ATLAS framework ids on one risk or control.
+
+        Ids carry an authoring version, as in ``MEASURE-2.3@1.0``. The suffix is
+        dropped here because frameworks.yaml already records a version per
+        framework, so repeating it on every id is noise.
+        """
+        out: dict[str, list[str]] = {}
+        for fw, ids in (obj.get("mappings") or {}).items():
+            if fw in OTHER_FRAMEWORKS:
+                out[fw] = sorted({self._split_ref(i)[0] for i in ids})
+        return dict(sorted(out.items()))
+
+    def frameworks_for_risk(self, risk_id: str) -> dict[str, list[str]]:
+        """Framework ids this one risk cites, so attribution is not lost."""
+        return self._other_framework_mappings(self.risks.get(risk_id) or {})
+
+    def frameworks_for_control(self, control_id: str) -> dict[str, list[str]]:
+        """Framework ids this one control cites.
+
+        NIST AI RMF appears only on controls, never on risks, so a technique's
+        NIST references are reachable only by walking through to the controls
+        that address its risks.
+        """
+        return self._other_framework_mappings(self.controls.get(control_id) or {})
+
     def frameworks_for_technique(self, technique_id: str) -> dict[str, list[str]]:
-        """Non-ATLAS framework ids reachable from a technique, via its risks."""
+        """Every non-ATLAS framework id reachable from a technique.
+
+        Walks both hops: the risks that cite the technique, and the controls
+        that address those risks. Stopping at risks would make NIST AI RMF
+        unreachable entirely.
+        """
         out: dict[str, set[str]] = defaultdict(set)
         for rid in self.risks_by_technique.get(technique_id, ()):
-            for fw, ids in (self.risks[rid].get("mappings") or {}).items():
-                if fw in OTHER_FRAMEWORKS:
+            for fw, ids in self.frameworks_for_risk(rid).items():
+                out[fw].update(ids)
+            for cid in self.controls_by_risk.get(rid, ()):
+                for fw, ids in self.frameworks_for_control(cid).items():
                     out[fw].update(ids)
         return {fw: sorted(v) for fw, v in sorted(out.items())}
 

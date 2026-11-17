@@ -100,10 +100,14 @@ def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
     """Every framework an ATLAS technique maps to: ATT&CK, STRIDE, OWASP, NIST.
 
     ATT&CK comes from ATLAS directly. The rest are reached through the CoSAI
-    Risk Map: an ATLAS technique is cited by one or more CoSAI risks, and those
-    risks carry STRIDE categories, OWASP Top 10 for LLM ids and NIST AI RMF
-    references. The CoSAI risks themselves are returned too, each with the
-    controls that address it and the personas who own them.
+    Risk Map in two hops: an ATLAS technique is cited by CoSAI risks, which
+    carry STRIDE categories and OWASP Top 10 for LLM ids, and those risks are
+    addressed by CoSAI controls, which carry NIST AI RMF references. NIST
+    appears only on controls, so stopping at risks would miss it entirely.
+
+    "other_frameworks" merges everything found. Each risk and control also
+    reports its own "frameworks", so which source contributed which id is
+    stated rather than left to inference.
 
     Useful for answering a compliance question in the caller's own vocabulary
     rather than ATLAS's.
@@ -147,6 +151,9 @@ def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
             "ids": ids,
         }
 
+    # Each risk and control carries its own framework ids. They are reported
+    # per object as well as merged, because the merged list alone forces a
+    # reader to guess which risk contributed which id.
     risks = []
     for rid in sorted(set(risk_ids)):
         r = cosai.risks[rid]
@@ -156,6 +163,7 @@ def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
                 "id": rid,
                 "title": r.get("title"),
                 "summary": r.get("shortDescription"),
+                "frameworks": cosai.frameworks_for_risk(rid),
                 "lifecycle_stages": list(r.get("lifecycleStage") or []),
                 "impact_types": list(r.get("impactType") or []),
                 "actor_access": list(r.get("actorAccess") or []),
@@ -167,6 +175,7 @@ def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
                             cosai.persona_name(p)
                             for p in ((cosai.controls.get(cid) or {}).get("personas") or [])
                         ],
+                        "frameworks": cosai.frameworks_for_control(cid),
                     }
                     for cid in sorted(control_ids)
                 ],
@@ -184,6 +193,8 @@ def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
             if ref.get("id")
             else None
         ),
+        # Merged across every risk and control below. Use the per-object
+        # "frameworks" fields when attribution matters.
         "other_frameworks": [framework_block(fw, ids) for fw, ids in frameworks.items()],
         "cosai_risks": risks,
         "cosai_risks_inherited_from": risks_inherited_from,
