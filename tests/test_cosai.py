@@ -247,5 +247,13 @@ def test_mapping_versions_are_reported(cosai):
     assert sum(versions.values()) == 53
 
 
-def test_stats_surface_the_mapping_staleness(cosai):
-    assert cosai.stats()["mappings_by_atlas_version"] == {"5.0.1": 53}
+def test_stats_report_what_is_loaded_not_join_coverage(cosai):
+    """get_atlas_info answers "which datasets are loaded", nothing more.
+
+    Returning join-coverage or mapping-version fields here made a question
+    about loaded datasets come back with a paragraph about mapping staleness.
+    Coverage belongs in the tools that depend on it, where an empty result
+    needs explaining.
+    """
+    stats = cosai.stats()
+    assert set(stats) == {"cosai_commit", "risks", "controls", "personas", "components"}

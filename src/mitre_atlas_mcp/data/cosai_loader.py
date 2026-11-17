@@ -101,9 +101,10 @@ class CosaiData:
     def mapping_versions(self) -> dict[str, int]:
         """How many mappings were authored against each ATLAS version.
 
-        Surfaced by get_atlas_info so the staleness of the bridge is visible:
-        upstream currently pins every mapping to ATLAS 5.0.1 even though it
-        vendors a newer release.
+        A maintenance diagnostic, deliberately not returned by any tool: it
+        describes upstream's labelling rather than anything a caller asked
+        about. Used by the tests to detect a refresh that changes the mapping
+        reference format.
         """
         counts: dict[str, int] = {}
         for obj in (*self.controls.values(), *self.risks.values()):
@@ -197,15 +198,19 @@ class CosaiData:
         return {"mitigations": sorted(mitigations), "techniques": sorted(techniques)}
 
     def stats(self) -> dict[str, Any]:
+        """What is loaded, not how well it joins to ATLAS.
+
+        Join coverage is reported by the tools that depend on it, where an
+        empty result actually needs explaining. Returning it here made a
+        question about which datasets are loaded come back with a paragraph
+        about mapping staleness, which is not what was asked.
+        """
         return {
             "cosai_commit": pinned_commit()[:12],
             "risks": len(self.risks),
             "controls": len(self.controls),
             "personas": len(self.personas),
             "components": len(self.components),
-            "atlas_mitigations_with_controls": len(self.controls_by_mitigation),
-            "atlas_techniques_with_risks": len(self.risks_by_technique),
-            "mappings_by_atlas_version": self.mapping_versions(),
         }
 
 

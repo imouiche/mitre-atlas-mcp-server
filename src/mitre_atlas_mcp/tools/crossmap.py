@@ -192,10 +192,8 @@ def map_technique_to_frameworks(technique_id: str) -> dict[str, Any]:
             "cosai_commit": pinned_commit()[:12],
             "atlas_techniques_cited_by_cosai": len(cosai.risks_by_technique),
             "note": (
-                "CoSAI pins ATLAS 5.0.1, which predates the 2026.10 agentic "
-                "expansion, so most agentic techniques have no CoSAI risk yet. "
-                "An empty other_frameworks list means CoSAI maps nothing to this "
-                "technique, not that no parallel exists."
+                "An empty other_frameworks list means CoSAI maps nothing to "
+                "this technique, not that no parallel exists."
             ),
         },
     }
