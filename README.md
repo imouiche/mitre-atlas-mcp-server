@@ -14,7 +14,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@imouiche/mitre-atlas-mcp-server.svg)](https://www.npmjs.com/package/@imouiche/mitre-atlas-mcp-server)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-[Install](#install) · [The idea](#the-idea) · [Tools](#tools) · [Data governance](#data-governance) · [Who owns the fix](#who-owns-the-fix) · [Example](#example)
+[Install](#install) · [The idea](#the-idea) · [Tools](#tools) · [Example prompts](#example-prompts) · [Data governance](#data-governance) · [Who owns the fix](#who-owns-the-fix)
 
 </div>
 
@@ -237,6 +237,103 @@ A support agent that can move money, matched against a documented financial
 transaction hijack with nine techniques in common. `get_case_study` returns any
 of these as an ordered attack flow: each step's tactic, the technique used, and
 what the operator actually did.
+
+## Example prompts
+
+Ask these as plain messages once the server is connected. Each one was run
+against this release; the figures are what it actually returns.
+
+### Threat-modelling a system you are building
+
+```
+What architectural surfaces can you threat-model against?
+```
+Returns the ten surfaces with the question that decides each. A good first
+call, since the rest build on it.
+
+```
+Threat-model this: an internal assistant that answers questions from our
+Confluence space and can file Jira tickets.
+```
+That is `untrusted_input` + `rag` + `tool_use`. Expect the compound risks to
+lead, including corpus-write-to-tool-call.
+
+```
+We have agents that delegate to sub-agents, and each can call tools.
+What is our exposure?
+```
+`multi_agent` + `tool_use`: 15 techniques in scope and the compound risk that
+tool authority is transitive across delegation.
+
+```
+What does RAG specifically expose us to, and what mitigates it?
+```
+Five techniques and five mitigations for the `rag` surface alone, which is
+useful when you want to drill into one decision rather than a whole system.
+
+### Finding precedent
+
+```
+Show me real cases that overlap a system with a RAG corpus.
+```
+Four matches, led by *Financial Transaction Hijacking with M365 Copilot as an
+Insider* and *Data Exfiltration from Slack AI via Indirect Prompt Injection*.
+
+```
+Which documented incidents involve poisoned models or MCP servers from a registry?
+```
+Eleven incidents for `model_supply_chain`, including *Poisoned Postmark MCP
+Server Email Exfiltration* and *Malicious Models on Hugging Face*.
+
+```
+Walk me through the Morris II worm case study step by step.
+```
+`AML.CS0024` as an ordered attack flow: twelve steps, each with its tactic,
+technique and what the operator actually did.
+
+### Looking things up
+
+```
+Search ATLAS for techniques about memory that apply to agentic systems.
+```
+Eight hits, filtered to the Agentic AI platform.
+
+```
+Which ATLAS techniques achieve the Exfiltration tactic?
+```
+
+```
+What mitigates RAG poisoning, and who implements it?
+```
+`AML.T0070`, its two mitigations, and the CoSAI control owners where they
+exist.
+
+```
+Tell me about the attacker tool AML.S0001.
+```
+
+### Cross-framework, for compliance and review
+
+```
+Map AML.T0086 to OWASP, STRIDE and NIST.
+```
+Exfiltration via AI Agent Tool Invocation, returning ids from all three, with
+each attributed to the CoSAI risk or control it came from.
+
+```
+We already threat-model against ATT&CK T1566. What AI-specific
+techniques attach to it?
+```
+
+```
+Here are the tools our agent exposes: [paste your tool list].
+What could an attacker who controls its input make it do?
+```
+Uses the `review_mcp_tool_surface` prompt, mapping each tool to the technique
+that covers its abuse.
+
+Setup instructions for Claude Desktop, including the environment pitfalls that
+stop a server from starting, are in [atlas_usage.md](atlas_usage.md).
 
 ## Data governance
 
