@@ -10,6 +10,7 @@
 [![Cross-maps](https://img.shields.io/badge/cross--maps-ATT%26CK%20%7C%20OWASP%20%7C%20STRIDE%20%7C%20NIST-e8590c)](#cross-framework)
 [![Data](https://img.shields.io/badge/data-vendored%20%7C%20offline-2f9e44)](#data-governance)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-published-success)](https://registry.modelcontextprotocol.io/?q=mitre-atlas-mcp-server)
+[![MCPRush security rating](https://mcprush.com/badge/imouiche-mitre-atlas-mcp/compact.svg)](https://mcprush.com/to/imouiche-mitre-atlas-mcp?ref=badge)
 [![npm](https://img.shields.io/npm/v/@imouiche/mitre-atlas-mcp-server.svg)](https://www.npmjs.com/package/@imouiche/mitre-atlas-mcp-server)
 [![npm downloads](https://img.shields.io/npm/dm/@imouiche/mitre-atlas-mcp-server.svg)](https://www.npmjs.com/package/@imouiche/mitre-atlas-mcp-server)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -336,6 +337,17 @@ Setup instructions for Claude Desktop, including the environment pitfalls that
 stop a server from starting, are in [atlas_usage.md](atlas_usage.md).
 
 ## Data governance
+
+<div align="center">
+
+<a href="https://mcprush.com/to/imouiche-mitre-atlas-mcp?ref=badge"><img width="380" height="200" src="https://mcprush.com/badge/imouiche-mitre-atlas-mcp/card.svg" alt="MITRE ATLAS MCP on MCPRush: security rating A, low access, no sign-in, 17 tools, 14 compatible clients" /></a>
+
+</div>
+
+[MCPRush](https://mcprush.com/to/imouiche-mitre-atlas-mcp?ref=badge) rates this
+server **security A** with **low access** scope and **no sign-in** required.
+That is their assessment rather than an independent audit, but it follows from
+the properties below.
 
 Security tooling is only as trustworthy as the data under it, and most MCP
 servers fetch theirs at call time from whatever the upstream API returns today.
